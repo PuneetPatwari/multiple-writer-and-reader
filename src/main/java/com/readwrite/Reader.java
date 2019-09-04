@@ -34,7 +34,7 @@ public class Reader implements Runnable {
                     try {
                         String log = "";
                         fc = input.getChannel();
-                        fileLock = fc.tryLock(0, input.length(), false);
+                        fileLock = fc.tryLock(0, input.length(), true);
                         long pointer = input.getFilePointer();
                         //Checks if the readers commitId matches with log's 1st character. Simple match
                         if (commitId == (char) input.read()) {

@@ -11,7 +11,6 @@ public class WriterMain {
         // Reading from properties file
         ExecutorService es = Executors.newFixedThreadPool(nTypes);
         RandomAccessFile file = new RandomAccessFile("src/main/resources/output.txt", "rw");
-//        RandomAccessFile file = new RandomAccessFile("/tmp/output.txt", "rw");
 
         for (int i = 0; i < nTypes; i++) {
             char commitId = (char) (i + 65); //Assuming that we will have commitID like A,B,C, to Z only

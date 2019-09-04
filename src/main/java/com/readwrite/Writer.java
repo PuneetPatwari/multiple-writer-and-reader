@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Writer implements Runnable {
-    final long SIZE = 1024L*5; //5KB size restriction for the log file
+    final long SIZE = 1024L * 5; //5KB size restriction for the log file
     private AtomicInteger uniqueId;
     private char commitId;
     private ExecutorService es;
@@ -28,36 +28,25 @@ public class Writer implements Runnable {
     @Override
     public void run() {
         int i = 0;
-        try {
-            while (i < nThreads) {
-                es.execute(() -> {
-                    FileChannel fc = null;
-                    FileLock fileLock = null;
-
+        while (i < nThreads) {
+            es.execute(() -> {
+                FileChannel fc = null;
+                FileLock fileLock = null;
+                while (true) {
                     try {
-                        while (true) {
-                            try {
-                                fc = output.getChannel();
-                                fileLock = fc.tryLock();
-                                if (output.length() < SIZE) {
-                                    String thName = Thread.currentThread().getName();
-                                    output.writeBytes(commitId+"-"+thName.charAt(thName.length()-1) + ": " + uniqueId.incrementAndGet() + ": " + "Data from " + thName + "\n");
-                                }
-//                                Thread.sleep(20);
-                                fileLock.release();
-                            } catch (final OverlappingFileLockException | IOException e) {
-                                if (fileLock != null && fileLock.isValid())
-                                    fileLock.release();
-                            }
+                        fc = output.getChannel();
+                        fileLock = fc.tryLock();
+                        if (output.length() < SIZE) {
+                            String thName = Thread.currentThread().getName();
+                            output.writeBytes(commitId + "-" + thName.charAt(thName.length() - 1) + ": " + uniqueId.incrementAndGet() + ": " + "Data from " + thName + "\n");
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+//                                Thread.sleep(20);
+                        fileLock.release();
+                    } catch (final OverlappingFileLockException | IOException e) {
                     }
-                });
-                i++;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+                }
+            });
+            i++;
         }
     }
 }

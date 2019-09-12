@@ -7,9 +7,8 @@ import java.util.concurrent.Executors;
 
 public class ReaderMain {
 
-    public static void main(Properties properties, int nTypes) throws IOException {
+    public static void main(Properties properties, int nTypes, ReaderWriterFile file) throws IOException {
         ExecutorService es = Executors.newFixedThreadPool(nTypes);
-        RandomAccessFile file = new RandomAccessFile("src/main/resources/output.txt", "rw");
 
         for (int i = 0; i < nTypes; i++) {
             char commitId = (char) (i + 65); //Assuming that we will have commitID like A,B,C, to Z only

@@ -9,15 +9,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Writer implements Runnable {
-    final long SIZE = 1024L * 5; //5KB size restriction for the log file
     private AtomicInteger uniqueId;
     private char commitId;
     private ExecutorService es;
     private int nThreads;
-    private RandomAccessFile output;
+    private ReaderWriterFile output;
 
 
-    public Writer(char commitId, int nThreads, RandomAccessFile output) {
+    public Writer(char commitId, int nThreads, ReaderWriterFile output) {
         uniqueId = new AtomicInteger(0);
         this.commitId = commitId;
         this.nThreads = nThreads;
@@ -30,19 +29,16 @@ public class Writer implements Runnable {
         int i = 0;
         while (i < nThreads) {
             es.execute(() -> {
-                FileChannel fc = null;
-                FileLock fileLock = null;
                 while (true) {
-                    try {
-                        fc = output.getChannel();
-                        fileLock = fc.tryLock();
-                        if (output.length() < SIZE) {
-                            String thName = Thread.currentThread().getName();
-                            output.writeBytes(commitId + "-" + thName.charAt(thName.length() - 1) + ": " + uniqueId.incrementAndGet() + ": " + "Data from " + thName + "\n");
+                    synchronized (this) {
+                        String thName = Thread.currentThread().getName();
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
+                        output.write(commitId + "-" + thName.charAt(thName.length() - 1) + ": " + uniqueId.incrementAndGet() + ": " + "Data from " + thName + "\n");
 //                                Thread.sleep(20);
-                        fileLock.release();
-                    } catch (final OverlappingFileLockException | IOException e) {
                     }
                 }
             });

@@ -14,9 +14,9 @@ public class Reader implements Runnable {
     private char commitId;
     ExecutorService es;
     private int nThreads;
-    private RandomAccessFile input;
+    private ReaderWriterFile input;
 
-    public Reader(char commitId, int nThreads, RandomAccessFile input) {
+    public Reader(char commitId, int nThreads, ReaderWriterFile input) {
         this.commitId = commitId;
         this.nThreads = nThreads;
         this.input = input;
@@ -28,27 +28,16 @@ public class Reader implements Runnable {
         int i = 0;
         while (i < nThreads) {
             es.execute(() -> {
-                FileChannel fc = null;
-                FileLock fileLock = null;
                 while (true) {
                     try {
-                        String log = "";
-                        fc = input.getChannel();
-                        fileLock = fc.tryLock(0, input.length(), true);
-                        long pointer = input.getFilePointer();
-                        //Checks if the readers commitId matches with log's 1st character. Simple match
-                        if (commitId == (char) input.read()) {
-                            input.seek(pointer);
-                            log = input.readLine();
-                            System.out.println(log);
-                        } else
-                            input.seek(pointer);
-                        fileLock.release();
-                    } catch (final OverlappingFileLockException | IOException e) {
-//                                Thread.sleep(20);
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
+                    String line = input.read(commitId);
+                    if (line != null)
+                        System.out.println(line);
                 }
-
             });
             i++;
         }

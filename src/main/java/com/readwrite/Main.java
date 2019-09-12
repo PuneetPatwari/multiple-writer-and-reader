@@ -13,7 +13,8 @@ public class Main {
         properties.load(input);
         int nTypes = Integer.parseInt(properties.getProperty("types")); //Number of unique commit IDs
 
-        WriterMain.main(properties, nTypes);
-        ReaderMain.main(properties, nTypes);
+        ReaderWriterFile file = new ReaderWriterFile();
+        WriterMain.main(properties, nTypes, file);
+        ReaderMain.main(properties, nTypes, file);
     }
 }
